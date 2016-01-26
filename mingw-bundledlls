@@ -91,6 +91,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "exe_file",
+        nargs='+',
         help="EXE or DLL file that you need to bundle dependencies for"
     )
     parser.add_argument(
@@ -108,8 +109,12 @@ def main():
     if args.upx and not args.copy:
         raise RuntimeError("Can't run UPX if --copy hasn't been provided.")
 
-    all_deps = set(gather_deps(args.exe_file, default_path_prefixes, []))
-    all_deps.remove(args.exe_file)
+    seen = []
+    all_deps = []
+    for exe in args.exe_file:
+        all_deps.extend(set(gather_deps(exe, default_path_prefixes, seen)))
+    for exe in args.exe_file:
+        all_deps.remove(exe)
 
     print("\n".join(all_deps))
 
